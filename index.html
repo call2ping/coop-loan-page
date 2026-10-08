@@ -96,6 +96,7 @@
   .b-ฉุกเฉิน{background:#ffe9ee;color:#c13357}
   .flag{display:inline-block;font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;margin:0 0 9px 5px;white-space:nowrap}
   .flag.new{background:linear-gradient(135deg,#ff4f7b,#e0306a);color:#fff;letter-spacing:.6px;box-shadow:0 2px 8px rgba(224,48,106,.35)}
+  .flag.inc{background:linear-gradient(135deg,#14b8a6,#0b8a80);color:#fff;letter-spacing:.4px;box-shadow:0 2px 8px rgba(11,138,128,.3)}
   .flag.soon{background:#fff1dc;color:#b45d00;border:1px solid #f6c77a;padding:2px 8px}
   .flag.over{background:#eceff4;color:#6b7896}
   .card.expired{opacity:.6}
@@ -485,14 +486,16 @@ function period(d){
   const sinceStart = Math.round((today - toDate(d.start))/DAY);
   const left = Math.round((toDate(d.end) - today)/DAY);
   return {
-    isNew: left>=0 && sinceStart<=NEW_DAYS,   // เริ่มมาไม่เกิน 30 วัน (รวมโครงการที่ประกาศแล้วแต่ยังไม่ถึงวันเริ่ม)
+    upcoming: sinceStart<0,                                  // ประกาศแล้วแต่ยังไม่ถึงวันเริ่ม
+    isNew: left>=0 && sinceStart>=0 && sinceStart<=NEW_DAYS, // เริ่มมาไม่เกิน 30 วัน
     soon: left>=0 && left<=SOON_DAYS,
     expired: left<0, left
   };
 }
 function flags(d){
   const p = period(d);
-  return (p.isNew ? '<span class="flag new">✨ NEW</span>' : '')
+  return (p.upcoming ? `<span class="flag inc">🔜 INCOMING · ${toDate(d.start).toLocaleDateString('th-TH',{day:'numeric',month:'short'})}</span>` : '')
+       + (p.isNew ? '<span class="flag new">✨ NEW</span>' : '')
        + (p.soon ? `<span class="flag soon">⏳ ${p.left ? 'เหลือ '+p.left+' วัน' : 'วันสุดท้าย'}</span>` : '')
        + (p.expired ? '<span class="flag over">หมดเขตแล้ว</span>' : '');
 }
